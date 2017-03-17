@@ -1,1 +1,105 @@
 #!/usr/bin/env bash
+
+set -o errexit   # Exit on most errors
+set -o nounset   # Dissallow expansion of unset variables
+
+# default variable values
+verbose=false
+D750_EDITOR="${D750_EDITOR:-${VISUAL:-${EDITOR-vi}}}"
+
+# DESC: throw error and exit
+# ARGS: none
+function unimplemented() {
+    printf "This functionality has not yet been implemented. Oops!" >&2
+    exit 1
+}
+
+# DESC: Usage help
+# ARGS: none
+# TODO: program name as well
+function script_usage() {
+    cat << EOF
+Usage: ${0##*/} [-h|--help] [-v|--verbose]
+
+Options:
+-h|--help		Display this help
+-v|--verbose		Display verbose output
+EOF
+}
+
+# DESC: print the version and exit
+# ARGS: none
+function version_info() {
+    printf "${0##*/} version 0.0.0"
+}
+
+# DESC: Exit script with the given message
+# ARGS: $1 (required): Message to print on exit
+#       $2 (optional): Exit code (defaults to 0)
+function script_exit() {
+    if [[ $# -eq 1 ]]; then
+        printf '%s\n' "$1"
+        exit 0
+    fi
+
+    if [[ $# -eq 2 && $2 =~ ^[0-9]+$ ]]; then
+        printf '%b\n' "$1"
+        exit $2
+    fi
+}
+
+# DESC: parameter parser
+# ARGS: $@ (optional): Arguments provided to the script
+function parse_params() {
+    local param
+    while [[ $# > 0 ]]; do
+        param="$1"
+        shift
+        case $param in
+            -h|--help)
+                script_usage
+                exit 0
+                ;;
+            -v|--verbose)
+                verbose=true
+                ;;
+            --version)
+                version_info
+                exit 0
+                ;;
+            --editor|--editor=*)
+                editor_val="${param##--editor=}"
+                if [[ "$editor_val" == "$param" ]]
+                then
+                    if [[ $# < 1 ]]; then
+                        script_exit "Missing value for the optional argument '$param'." 2
+                    fi
+                    editor_val="$1"
+                    shift
+                fi
+                D750_EDITOR="$editor_val"
+                ;;
+            *)
+                script_exit "Invalid parameter was provided: $param" 2
+        esac
+    done
+}
+
+# DESC: Main control flow
+# ARGS: $@ (optional) arguments passed to the script
+function main() {
+    parse_params "$@"
+
+    year="$(date +%Y)"
+    month="$(date +%m)"
+    day="$(date +%d)"
+
+    month_folder="${D750_ARCHIVE:-$HOME/.write_archive}/$year/$month"
+    mkdir -p "$month_folder"
+
+    "$D750_EDITOR" "$month_folder/$day.txt"
+}
+
+main "$@"
+
+# vim:syntax=sh cc=80 tw=79 ts=4 sw=4 sts=4 et sr
