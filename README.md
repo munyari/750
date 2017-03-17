@@ -25,7 +25,16 @@ website. The service is not without its problems though.
 
 ## Features
 
+- Hierarchical directory structure, based on [ISO 8601][xkcd], makes traversal
+  of your writing history dead simple
+- A single command to begin your distraction free writing
+- Use the text editor of your choice (see [Configuration](#configuration)
+  below).
+
+[xkcd]: https://xkcd.com/1179/
+
 ## Planned Features
+
 - Vim/Neovim integration. Possibly with airline/powerline/lightline, or just the
   bare statusline.
 - Ability to view statistics and visualization of your writing data
@@ -34,11 +43,18 @@ website. The service is not without its problems though.
 ## Setup and Usage
 
 Clone the repository
+
 ```bash
 git clone https://github.com/munyari/750.git
 cd 750
 ./750 --help
 ```
+
+## Configuration
+
+- The `D750_EDITOR` environment variable sets the default editor (overridden by
+  the `--editor` environment variable).
+- The `D750_ARCHIVE` environment variable sets the root of the directory hierarchy.
 
 ## Contributing
 
